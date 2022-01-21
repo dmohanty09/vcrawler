@@ -36,25 +36,32 @@ class YoutubeScraper:
         response = request.execute()
         return response
 
-    def get_playlist(self, list_name):
-        most_popular = self.get_most_popular()
-        print(most_popular)
-        v_ids = [item['id'] for item in most_popular['items']]
+    def get_playlist_by_id(self, playlist_id, page_token=None):
+        print('Getting first 5 playlist videos..')
+        request = self.youtube.playlistItems().list(
+            part="snippet",
+            pageToken=page_token,
+            playlistId = playlist_id
+        )
+        response = request.execute()
+        return request, response
+
+    def get_playlist(self, playlist_id):
+        request = self.youtube.playlistItems().list(
+            part="snippet",
+            playlistId = playlist_id
+        )
+        response = request.execute()
+        print(response)
+        v_ids = [item['snippet']['resourceId']['videoId'] for item in response['items']]
         self.transcribe_videos(v_ids)
-        n_page = most_popular['nextPageToken']
-        # return # for test
-        while(n_page is not None):
-            print('Getting ' + str(n_page))
-            most_popular = self.get_most_popular(n_page)
-            print(most_popular)
-            v_ids = [item['id'] for item in most_popular['items']]
+        request = self.youtube.playlistItems().list_next(request, response)
+        while(request is not None):
+            response = request.execute()
+            print(response)
+            v_ids = [item['snippet']['resourceId']['videoId'] for item in response['items']]
             self.transcribe_videos(v_ids)
-            try:
-                n_page = most_popular['nextPageToken']
-                print('n_page: ' + n_page)
-            except Exception as e:
-                print(e)
-                n_page = None
+            request = self.youtube.playlistItems().list_next(request, response)
 
     def transcribe_video(self, video_id):
         print(f'Transcribing Video ID: {video_id}')
@@ -76,11 +83,11 @@ class YoutubeScraper:
             f.close()
 
     def transcribe_videos(self, v_ids):
-        print(v_ids)
+        print('vids: ' + str(v_ids))
         # import pdb
         # pdb.set_trace()
-        # break # for test
         for vid in v_ids:
+            print(vid)
             self.transcribe_video(vid)
 
 if __name__ == '__main__':
