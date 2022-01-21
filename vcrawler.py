@@ -8,7 +8,7 @@ import googleapiclient.errors
 CHANNEL_NAME = 'smosh'
 PLAYLIST_ID = 'PLShD8ZZW7qjkTzS17ENOnfpk6Sq220k1z'
 
-CACHE_DIR = '/mnt/c/Users/dmoha/Documents/GitHub/vcrawler/cache'
+CACHE_DIR = './cache'
 TRANSCRIPTS_DIR = CACHE_DIR + '/video_transcripts'
 
 scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
